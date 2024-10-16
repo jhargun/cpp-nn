@@ -22,13 +22,13 @@ MLP<T>::MLP(const vector<unsigned int>& layerSizes, const ActivationFunction<T>&
         unsigned int inputSize = layerSizes[i];
         unsigned int outputSize = layerSizes[i+1];
         weights.emplace_back(make_unique<Matrix<T>>(Matrix<T>::randGaussian(inputSize, outputSize)));
-        biases.emplace_back(make_unique<Matrix<T>>(Matrix<T>::randGaussian(outputSize, 1)));
+        biases.emplace_back(make_unique<Matrix<T>>(Matrix<T>::randGaussian(1, outputSize)));
     }
 }
 
 template <typename T>
 Matrix<T> MLP<T>::forwardPassLayer(const Matrix<T>& input, unsigned int layer) const {
-    Matrix<T> result = weights[layer]->matMul(input);
+    Matrix<T> result = input.matMul(*weights[layer]);
     result.matAdd(*biases[layer]);
     result.applyElementwise(activFn.getActivationFn());
     return result;
@@ -69,13 +69,13 @@ void MLP<T>::backwardPass(const typename MLP<T>::MatPtrVec& activations, const M
         activDerivs.applyElementwise(activFn.getDerivativeFn());
         Matrix<T> gradients = error.elemWiseMul(activDerivs);
         gradients.scalarMul(learningRate);
-        Matrix<T> weightGrads = gradients.matMul(activations[i-1]->transpose());
+        Matrix<T> weightGrads = activations[i-1]->transpose().matMul(gradients);
 
         // Update weights and biases
         weights[i-1] = make_unique<Matrix<T>>(weights[i-1]->matAdd(weightGrads));
         biases[i-1] = make_unique<Matrix<T>>(biases[i-1]->matAdd(gradients));
 
-        error = weights[i-1]->transpose().matMul(error);
+        error = error.matMul(weights[i-1]->transpose());
     }
 }
 
