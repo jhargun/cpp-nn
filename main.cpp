@@ -11,22 +11,30 @@ using namespace std;
 using Dtype = float;
 
 int main() {
-    MLP<Dtype> mlp({2, 3, 1}, Sigmoid<Dtype>());
+    Sigmoid<Dtype> fn = Sigmoid<Dtype>();
+    MLP<Dtype> mlp({2, 3, 1}, fn);
 
+    // // XOR data (with some noise)
+    // Dtype dataPoints[] = {
+    //     0, 0, 0,
+    //     0, 1, 1,
+    //     1, 0, 1,
+    //     1, 1, 0,
+    //     0.1, 0.1, 0,
+    //     0.1, 0.9, 1,
+    //     0.9, 0.1, 1,
+    //     0.9, 0.9, 0
+    // };
     // XOR data (with some noise)
     Dtype dataPoints[] = {
-        0, 0, 0,
-        0, 1, 1,
-        1, 0, 1,
-        1, 1, 0,
-        0.1, 0.1, 0,
-        0.1, 0.9, 1,
-        0.9, 0.1, 1,
-        0.9, 0.9, 0
+        1, 1, 1,
+        0, 0, -1,
+        .9, .9, 1,
+        .1, .1, -1,
     };
     vector<pair<Matrix<Dtype>, Matrix<Dtype>>> data;
 
-    for (int i = 0; i < 8; ++i) {
+    for (int i = 0; i < (sizeof(dataPoints) / sizeof(dataPoints[0]) / 3); ++i) {
         vector<vector<Dtype>> inVec = {{dataPoints[i*3], dataPoints[i*3 + 1]}};
         vector<vector<Dtype>> outVec = {{dataPoints[i*3 + 2]}};
         Matrix<Dtype> inMat{inVec};
@@ -36,13 +44,13 @@ int main() {
 
     cout << "Initial preds:" << endl;
     for (const auto &pair : data) {
-        cout << "pred: " << mlp.predict(pair.first) << " vs correct: " << pair.second << endl;
+        cout << "pred: " << mlp.predict(pair.first)(0,0) << " vs correct: " << pair.second(0,0) << endl;
     }
 
-    mlp.train(data, 0.05, 20, true);
+    mlp.train(data, 0.01, 10000, false);
 
     cout << "Final preds:" << endl;
     for (const auto &pair : data) {
-        cout << "pred: " << mlp.predict(pair.first) << " vs correct: " << pair.second << endl;
+        cout << "pred: " << mlp.predict(pair.first)(0,0) << " vs correct: " << pair.second(0,0) << endl;
     }
 }
