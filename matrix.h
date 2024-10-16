@@ -12,7 +12,7 @@ experiment with CUDA), I decided to implement a matrix class myself.
 template <typename T>
 class Matrix {
   private:
-    const unsigned int rows, cols;
+    unsigned int rows, cols;
     std::vector<T> data;
 
     // Helper: get the index of the element at row i, column j
@@ -28,7 +28,7 @@ class Matrix {
     Matrix(unsigned int rows, unsigned int cols);
 
     // Constructor that is initialized with a 2D vector
-    Matrix(std::vector<std::vector<T>>& values);
+    Matrix(const std::vector<std::vector<T>>& values);
 
     // Constructor that initializes the matrix size and initializes all values
     // to follow a Gaussian distribution
@@ -50,7 +50,8 @@ class Matrix {
     void printShape() const;
 
     // Prints the entire matrix
-    friend std::ostream& operator<<(std::ostream& os, const Matrix<T>& obj);
+    template <typename T1>
+    friend std::ostream& operator<<(std::ostream& os, const Matrix<T1>& obj);
 
     // Matrix math operations -----------------------------------------
 
@@ -69,3 +70,18 @@ class Matrix {
     // Returns a new matrix which is the transpose of the current matrix
     Matrix transpose() const;
 };
+
+template <typename T>
+std::ostream& operator<<(std::ostream& os, const Matrix<T>& obj) {
+    // Print matrix entries with brackets and commas
+    os << "[" << std::endl;
+    for (unsigned int i = 0; i < obj.getRows(); ++i) {
+        os << "\t[ ";
+        for (unsigned int j = 0; j < obj.getCols(); j++) {
+            os << obj(i, j) << ", ";
+        }
+        os << "]" << std::endl;
+    }
+    os << "]" << std::endl;
+    return os;
+}

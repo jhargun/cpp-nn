@@ -4,15 +4,17 @@
 #include "matrix.h"
 #include "mlp.h"
 #include "activations/sigmoid.h"
+// #include "activations/activation.h"
 
 using namespace std;
 
+using Dtype = float;
+
 int main() {
-    Sigmoid<float> sigmoid;
-    MLP<float> mlp({2, 3, 1}, sigmoid);
+    MLP<Dtype> mlp({2, 3, 1}, Sigmoid<Dtype>());
 
     // XOR data (with some noise)
-    float dataPoints[] = {
+    Dtype dataPoints[] = {
         0, 0, 0,
         0, 1, 1,
         1, 0, 1,
@@ -22,15 +24,14 @@ int main() {
         0.9, 0.1, 1,
         0.9, 0.9, 0
     };
-    vector<pair<Matrix<float>, Matrix<float>>> data;
+    vector<pair<Matrix<Dtype>, Matrix<Dtype>>> data;
 
     for (int i = 0; i < 8; ++i) {
-        vector<float> inVec{dataPoints[i*3], dataPoints[i*3 + 1]};
-        vector<float> outVec{dataPoints[i*3 + 2]};
-        data.emplace_back(
-            Matrix<float>{vector<vector<float>>{inVec}},
-            Matrix<float>(vector<vector<float>>{outVec})
-        );
+        vector<vector<Dtype>> inVec = {{dataPoints[i*3], dataPoints[i*3 + 1]}};
+        vector<vector<Dtype>> outVec = {{dataPoints[i*3 + 2]}};
+        Matrix<Dtype> inMat{inVec};
+        Matrix<Dtype> outMat(outVec);
+        data.emplace_back(inMat, outMat);
     }
 
     cout << "Initial preds:" << endl;

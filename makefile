@@ -1,6 +1,6 @@
 CXX = g++
 CXXFLAGS = -std=c++14 -Wall -MMD
-EXEC = nn
+EXEC = a.out
 OBJECTS = matrix.o mlp.o main.o
 DEPENDS = ${OBJECTS:.o=.d}
 

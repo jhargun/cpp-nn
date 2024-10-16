@@ -6,12 +6,14 @@
 template <typename T>
 class Sigmoid : public ActivationFunction<T> {
   protected:
-    T getActivation(T x) const override {
-        return 1 / (1 + std::exp(-1 * x));
+    typename ActivationFunction<T>::F getActivFn() const override {
+        return [](T x) { return 1 / (1 + exp(-x)); };
     }
 
-    T getActivationPrime(T x) const override {
-        T s = this->activation(x);
-        return s * (1 - s);
+    typename ActivationFunction<T>::F getDerivFn() const override {
+        return [](T x) {
+            T sig = 1 / (1 + exp(-x));
+            return sig * (1 - sig);
+        };
     }
 };

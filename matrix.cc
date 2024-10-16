@@ -24,7 +24,7 @@ Matrix<T>::Matrix(unsigned int rows, unsigned int cols): rows(rows), cols(cols) 
 }
 
 template <typename T>
-Matrix<T>::Matrix(std::vector<std::vector<T>>& values): rows(values.size()), cols(values[0].size()), data(rows * cols) {
+Matrix<T>::Matrix(const vector<vector<T>>& values): rows(values.size()), cols(values[0].size()), data(rows * cols) {
     // Check that every row has the same number of columns
     for (const auto &row : values) {
         if (row.size() != cols) {
@@ -84,21 +84,6 @@ unsigned int Matrix<T>::getCols() const { return cols; }
 template <typename T>
 void Matrix<T>::printShape() const {
     cout << "(" << rows << ", " << cols << ")" << endl;
-}
-
-template <typename T>
-ostream& operator<<(ostream& os, const Matrix<T>& obj) {
-    // Print matrix entries with brackets and commas
-    os << "[" << endl;
-    for (unsigned int i = 0; i < obj.getRows(); ++i) {
-        os << "\t[ ";
-        for (unsigned int j = 0; j < obj.getCols(); j++) {
-            os << obj(i, j) << ", ";
-        }
-        os << "]" << endl;
-    }
-    os << "]" << endl;
-    return os;
 }
 
 template <typename T>
@@ -187,5 +172,10 @@ Matrix<T> Matrix<T>::transpose() const {
     return result;
 }
 
+/* 
+Explicit instantiation used (rather than .tpp files) to reduce 
+recompilation overhead and since I know the types I will be using.
+May want to consider using .tpp files in the future.
+*/
 template class Matrix<float>;
 template class Matrix<double>;
