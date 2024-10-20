@@ -4,6 +4,7 @@
 #include "matrix.h"
 #include "mlp.h"
 #include "activations/sigmoid.h"
+#include "activations/relu.h"
 
 using namespace std;
 
@@ -11,7 +12,8 @@ using namespace std;
 using Dtype = float;
 
 int main() {
-    Sigmoid<Dtype> fn = Sigmoid<Dtype>();
+    // Sigmoid<Dtype> fn = Sigmoid<Dtype>();
+    Relu<Dtype> fn = Relu<Dtype>();
     MLP<Dtype> mlp({2, 3, 3, 1}, fn);
 
     // XOR data (with some noise)
@@ -29,7 +31,7 @@ int main() {
     vector<pair<Matrix<Dtype>, Matrix<Dtype>>> data;
 
     // // No batching
-    // for (int i = 0; i < (sizeof(dataPoints) / sizeof(dataPoints[0]) / 3); ++i) {
+    // for (unsigned int i = 0; i < (sizeof(dataPoints) / sizeof(dataPoints[0]) / 3); ++i) {
     //     vector<vector<Dtype>> inVec = {{dataPoints[i*3], dataPoints[i*3 + 1]}};
     //     vector<vector<Dtype>> outVec = {{dataPoints[i*3 + 2]}};
     //     Matrix<Dtype> inMat{inVec};
@@ -39,7 +41,7 @@ int main() {
 
     // Everything in a single batch
     vector<vector<Dtype>> inVec, outVec;
-    for (int i = 0; i < (sizeof(dataPoints) / sizeof(dataPoints[0]) / 3); ++i) {
+    for (unsigned int i = 0; i < (sizeof(dataPoints) / sizeof(dataPoints[0]) / 3); ++i) {
         inVec.push_back({dataPoints[i*3], dataPoints[i*3 + 1]});
         outVec.push_back({dataPoints[i*3 + 2]});
     }
