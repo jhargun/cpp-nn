@@ -69,6 +69,11 @@ class Matrix {
 
     // Returns a new matrix which is the transpose of the current matrix
     Matrix transpose() const;
+
+    enum Axis { ROW, COL, ALL };
+
+    // Returns the mean of all elements in the matrix flattened along specified axis
+    Matrix mean(Axis axis) const;
 };
 
 template <typename T>

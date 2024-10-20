@@ -110,14 +110,27 @@ Matrix<T> Matrix<T>::matMul(const Matrix<T>& other) const {
 
 template <typename T>
 Matrix<T> Matrix<T>::matAdd(const Matrix<T>& other) const {
-    if (rows != other.getRows() || cols != other.getCols()) {
+    using fnType = function<T(unsigned int, unsigned int)>;
+    fnType getOtherElem = [&other](unsigned int i, unsigned int j) { return other(i, j); };
+
+    if (cols != other.getCols()) {
         throw invalid_argument("Matrix dimensions not compatible for addition");
+    } else if (rows != other.getRows()) {
+        if (rows == 1) {
+            // Swap order so we only have to handle one special case (slightly inefficient)
+            return other.matAdd(*this);
+        } else if (other.getRows() == 1) {
+            // Broadcast the row vector by returning values from the 0th row for all rows
+            getOtherElem = [&other](unsigned int i, unsigned int j) { return other(0, j); };
+        } else {
+            throw invalid_argument("Matrix dimensions do not match (not compatible for addition)");
+        }
     }
 
     Matrix<T> result(rows, cols);
     for(unsigned int i = 0; i < rows; ++i) {
         for(unsigned int j = 0; j < cols; ++j) {
-            result(i, j) = (*this)(i, j) + other(i, j);
+            result(i, j) = (*this)(i, j) + getOtherElem(i, j);
         }
     }
 
@@ -170,6 +183,44 @@ Matrix<T> Matrix<T>::transpose() const {
     }
 
     return result;
+}
+
+template <typename T>
+Matrix<T> Matrix<T>::mean(Axis axis) const {
+    Matrix<T> result(1,1);
+    T sum = 0;
+
+    switch(axis) {
+        case ROW:
+            result = Matrix<T>(1, cols);
+            for (unsigned int j = 0; j < cols; ++j) {
+                sum = 0;
+                for (unsigned int i = 0; i < rows; ++i) {
+                    sum += (*this)(i, j);
+                }
+                result(0, j) = sum / rows;
+            }
+            return result;
+        case COL:
+            result = Matrix<T>(rows, 1);
+            for (unsigned int i = 0; i < rows; ++i) {
+                sum = 0;
+                for (unsigned int j = 0; j < cols; ++j) {
+                    sum += (*this)(i, j);
+                }
+                result(i, 0) = sum / cols;
+            }
+            return result;
+        case ALL:
+            sum = 0;
+            for (const auto &val : data) {
+                sum += val;
+            }
+            result(0, 0) = sum / (rows * cols);
+            return result;
+        default:
+            throw invalid_argument("Mean along specified axis not implemented");
+    }
 }
 
 /* 
