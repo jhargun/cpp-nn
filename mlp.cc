@@ -29,8 +29,13 @@ MLP<T>::MLP(const vector<unsigned int>& layerSizes, const ActivationFunction<T>&
 template <typename T>
 Matrix<T> MLP<T>::forwardPassLayer(const Matrix<T>& input, unsigned int layer) const {
     Matrix<T> result = input.matMul(*weights[layer]);
-    result.matAdd(*biases[layer]);
-    result.applyElementwise(activFn.getActivationFn());
+    result = result.matAdd(*biases[layer]);
+
+    // Don't apply activation function to the output layer
+    if (layer != numLayers - 1) {
+        result.applyElementwise(activFn.getActivationFn());
+    }
+    // result.applyElementwise(activFn.getActivationFn());
     return result;
 }
 
@@ -58,7 +63,13 @@ void MLP<T>::backwardPass(const typename MLP<T>::MatPtrVec& activations, const M
         throw invalid_argument("Target dimensions do not match output dimensions");
     }
 
-    // Subtract target from output to get error
+    /*
+    Subtract target from output to get error. Note that this is assumed to be the derivative of the loss 
+    function with respect to the output at the start. This works for MSE loss (the missing factor of 2
+    can be accounted for in the learning rate).
+
+    TODO: Make this more extensible to enable other loss functions
+    */
     lastActivation.scalarMul(-1);
     Matrix<T> error = target.matAdd(lastActivation);
 
@@ -73,7 +84,9 @@ void MLP<T>::backwardPass(const typename MLP<T>::MatPtrVec& activations, const M
 
         // Update weights and biases
         weights[i-1] = make_unique<Matrix<T>>(weights[i-1]->matAdd(weightGrads));
-        biases[i-1] = make_unique<Matrix<T>>(biases[i-1]->matAdd(gradients));
+        biases[i-1] = make_unique<Matrix<T>>(
+            biases[i-1]->matAdd(gradients.mean(Matrix<T>::ROW))
+        );
 
         error = error.matMul(weights[i-1]->transpose());
     }
